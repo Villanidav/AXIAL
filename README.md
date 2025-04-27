@@ -43,7 +43,7 @@ The replication process involved the following key steps:
 
 *   The authors of the original AXIAL paper.
 *   The Alzheimer's Disease Neuroimaging Initiative (ADNI).
-*   The Clinica team.
+*   The Clinica team for the software.
 *   The Jülich Supercomputing Centre for providing access to the JEDI cluster.
 
 ## Course Information
