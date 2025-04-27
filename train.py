@@ -12,7 +12,6 @@ from src.config import load_config
 from src.utils import get_device
 from src.utils import set_seeds
 from src import experiments
-import torch.distributed as dist
 
 
 
