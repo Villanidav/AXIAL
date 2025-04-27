@@ -1,0 +1,86 @@
+
+cuda_device: [0] # The GPUs to be used for training and testing (e.g. [0, 1, 2, 3])
+random_seed: 42
+image_type: "3D" # 2D (train on 2D slice and test on 3D volumes) or 3D (train and test on 3D volumes)
+network_3D: Axial3D 
+backbone: VGG16 # ResNet50, ResNet34, ResNet101, EfficientNetB1, EfficientNetB4, EfficientNetB6, EfficientNetV2S,
+                # EfficientNetV2M, SwinV2T, DenseNet121, DenseNet161, VGG11, VGG13, VGG16, VGG19, ConvNextBase, ConvNextSmall, ConvNextTiny
+pretrained_on: ImageNet # ImageNet, RadImageNet, None
+
+# ----------------------- Dataset parameters -----------------------
+task: ['CN', 'AD'] # Defines the classes to be considered for the classification
+dataset_name: 'ADNI1Complete1Yr1.5T'
+dataset_csv: 'dataset/BIDS/dataset.csv' #_conversion_36months.csv' # path to the dataset csv file
+num_workers: 1 # Number of workers for the data loader
+
+# ----------------------- Hyperparameters -----------------------
+num_epochs: 100 # Number of epochs
+batch_size: 8 # Batch size
+dropout: 0.3 # Dropout probability, drop random layer outputs during training, to prevent overfitting. 
+k_folds: 5 # If <= 1, no k-fold cross validation
+val_perc_split: 0.2 # The percentage of the training set to be used for validation
+num_slices: 80 # Number of slices to be considered for each MRI volume starting from the center in specified slicing plane
+slicing_plane: axial # axial, coronal, sagittal
+learning_rate: 0.01 # Learning rate
+weight_decay: 0.0001 # Weight decay
+freeze_first_percentage: 0.5 # Percentage of the backbone to be frozen
+optimizer: AdamW # Adam, AdamW, SGD, Lion
+optimizer_kwargs: # Optimizer parameters
+     betas: [0.5, 0.999]
+     momentum: 0.0009
+     amsgrad: False
+     nesterov: True
+
+use_early_stopping: True # If True, the early stopping is used
+patience: 20 # Number of epochs with no improvement after which training will be stopped
+# ----------------------------------------------------------------
+
+data_augmentation_slice: True # If True, the data augmentation is applied on the 2D slices, the transformations are
+                              # defined in src/data/transforms.py
+
+# ---------------------- Data augmentation on 3D volume -----------------------
+data_augmentation:
+  RandomTransformations: # Apply a set of random transformations
+    probability: 0.4 # Probability of applying the transformations on the input image
+    transformations: # List of transformations to be applied on the input image with the specified probability
+      - transformation: RandomNoise 
+        parameters:
+          std: [0, 5] 
+          mean: [0, 1.5]
+        probability: 0.2
+      - transformation: RandomAffine
+        parameters:
+          degrees: [0, 0, 0, 0, -2, 2]
+          isotropic: true
+          translation: [-1, 1, -1, 1, 0, 0]
+        probability: 0.1
+      - transformation: RandomElasticDeformation
+        parameters:
+          num_control_points: 10
+          locked_borders: 2
+          max_displacement: 5
+        probability: 0.3
+      - transformation: RandomBiasField
+        parameters:
+          coefficients: [0.1, 0.3]
+          order: 3
+        probability: 0.4
+      - transformation: RandomBlur
+        parameters:
+          std: [0.2, 0.8]
+        probability: 0.2
+      - transformation: RandomFlip
+        parameters:
+          axes: 0
+        probability: 0.4
+      - transformation: RandomGamma
+        parameters:
+          log_gamma: [-0.5, 0.5]
+        probability: 0.4
+# ----------------------------------------------------------------
+
+extra: # extra string to track the experiments
+resume: True # If True, the experiment resume from the best model of each fold according to experiment_folder
+experiment_folder: '/p/project1/summit25demo/wang77/AXIAL/runs/ADNI1Complete1Yr1.5T/AD vs CN/3D/axial/Axial3D/VGG16/ImageNet/rand_seed_42_val_split_0.2_epochs_100_lr_0.01_batch_size_8_dropout_0.3_wd_0.0001_freeze_0.5_slices_80_optim_adamw_scheduler_none_pretrained_false/2025-04-24-17-56' # Path to the pretrained model
+skip_training: False # If True, the training is skipped and the model is tested on the test set
+revert_slices_order: False # If True, the slices order is reverted to the original one
