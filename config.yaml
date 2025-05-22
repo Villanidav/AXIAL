@@ -16,14 +16,14 @@ num_workers: 1 # Number of workers for the data loader
 # ----------------------- Hyperparameters -----------------------
 num_epochs: 100 # Number of epochs
 batch_size: 8 # Batch size
-dropout: 0.3 # Dropout probability, drop random layer outputs during training, to prevent overfitting. 
+dropout: 0.5 # Dropout probability, drop random neuron during training, to prevent overfitting. 
 k_folds: 5 # If <= 1, no k-fold cross validation
 val_perc_split: 0.2 # The percentage of the training set to be used for validation
 num_slices: 80 # Number of slices to be considered for each MRI volume starting from the center in specified slicing plane
 slicing_plane: axial # axial, coronal, sagittal
-learning_rate: 0.01 # Learning rate
-weight_decay: 0.0001 # Weight decay
-freeze_first_percentage: 0.5 # Percentage of the backbone to be frozen
+learning_rate: 0.0001 # Learning rate
+weight_decay: 0.01 # Weight decay
+freeze_first_percentage: 0.75 # Percentage of the backbone to be frozen
 optimizer: AdamW # Adam, AdamW, SGD, Lion
 optimizer_kwargs: # Optimizer parameters
      betas: [0.5, 0.999]

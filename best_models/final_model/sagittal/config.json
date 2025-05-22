@@ -1,0 +1,122 @@
+{
+    "cuda_device": [
+        0
+    ],
+    "random_seed": 42,
+    "image_type": "3D",
+    "network_3D": "Axial3D",
+    "backbone": "VGG16",
+    "pretrained_on": "ImageNet",
+    "freeze_base": true,
+    "freeze_percentage": 0.5,
+    "num_heads": 4,
+    "num_trans_blocks": 3,
+    "forward_expansion": 4,
+    "task": [
+        "CN",
+        "AD"
+    ],
+    "dataset_name": "ADNI1Complete1Yr1.5T",
+    "dataset_csv": "dataset/BIDS/dataset.csv",
+    "num_workers": 1,
+    "load_pretrained_model": false,
+    "pretrained_model_path": "models/AwareNet_ADvsCN.pth",
+    "num_epochs": 30,
+    "batch_size": 8,
+    "dropout": 0.4,
+    "k_folds": 8,
+    "val_perc_split": 0.125,
+    "num_slices": 80,
+    "slicing_plane": "sagittal",
+    "learning_rate": 5e-05,
+    "weight_decay": 0.01,
+    "freeze_first_percentage": 0.3,
+    "optimizer": "AdamW",
+    "optimizer_kwargs": {
+        "betas": [
+            0.9,
+            0.999
+        ],
+        "amsgrad": false
+    },
+    "scheduler": "None",
+    "scheduler_kwargs": null,
+    "warmup_scheduler": "None",
+    "warmup_kwargs": null,
+    "use_early_stopping": true,
+    "patience": 15,
+    "data_augmentation_slice": true,
+    "data_augmentation": {
+        "RandomTransformations": {
+            "probability": 0.8,
+            "transformations": [
+                {
+                    "transformation": "RandomAffine",
+                    "parameters": {
+                        "degrees": [
+                            0,
+                            0,
+                            0,
+                            0,
+                            -5,
+                            5
+                        ],
+                        "isotropic": true,
+                        "translation": [
+                            -2,
+                            2,
+                            -2,
+                            2,
+                            -1,
+                            1
+                        ]
+                    },
+                    "probability": 0.4
+                },
+                {
+                    "transformation": "RandomElasticDeformation",
+                    "parameters": {
+                        "num_control_points": 10,
+                        "locked_borders": 2,
+                        "max_displacement": 5
+                    },
+                    "probability": 0.3
+                },
+                {
+                    "transformation": "RandomBiasField",
+                    "parameters": {
+                        "coefficients": [
+                            0.1,
+                            0.3
+                        ],
+                        "order": 3
+                    },
+                    "probability": 0.3
+                },
+                {
+                    "transformation": "RandomBlur",
+                    "parameters": {
+                        "std": [
+                            0.1,
+                            0.4
+                        ]
+                    },
+                    "probability": 0.3
+                },
+                {
+                    "transformation": "RandomFlip",
+                    "parameters": {
+                        "axes": 0
+                    },
+                    "probability": 0.5
+                }
+            ]
+        }
+    },
+    "extra": null,
+    "resume": false,
+    "experiment_folder": "/p/project1/summit25demo/wang77/AXIAL/runs/ADNI1Complete1Yr1.5T/AD vs CN/3D/axial/Axial3D/VGG16/ImageNet/rand_seed_42_val_split_0.2_epochs_100_lr_0.01_batch_size_8_dropout_0.3_wd_0.0001_freeze_0.5_slices_80_optim_adamw_scheduler_none_pretrained_false/2025-04-24-17-56",
+    "skip_training": false,
+    "revert_slices_order": false,
+    "radimgnet_classes": 2
+}
