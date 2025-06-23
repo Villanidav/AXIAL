@@ -4,11 +4,11 @@ import os
 import numpy as np
 import torch
 from sklearn.model_selection import KFold
-from src.data import train_val_test_subject_split
-from src.model import compute_metrics
-from src.logger import create_writer
-from src.data import load_dataframe
-from src.config import load_config
+from src.data.split_data import train_val_test_subject_split
+from src.model.metrics import compute_metrics
+from src.logger.tensorboard_writer import create_writer
+from src.data.load_df import load_dataframe
+from src.config.yaml import load_config
 from src.utils import get_device
 from src.utils import set_seeds
 from src import experiments
@@ -20,6 +20,8 @@ def main():
     timestamp = datetime.now().strftime("%Y-%m-%d-%H-%M")
     # Load the yaml config file
     config = load_config('config.yaml')
+    if config is None:
+        raise ValueError("Failed to load config.yaml. Please check the file and the load_config function.")
     # Get the device to use
     device = get_device(cuda_idx=config['cuda_device'])
     # Get the dataframes and subjects based on the classification task
