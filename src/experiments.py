@@ -1,13 +1,15 @@
 from src import engine
-from src.data import get_transforms, get_dataloaders
-from src.models import get_backbone, BackboneWithClassifier, Axial3D, TransformerConv3D, compute_metrics
-from src.models.majority_voting_3d import MajorityVoting3D
-from src.mynn import get_optim, get_schedul, get_warmup_schedul
+from src.data.transform import get_transforms
+from src.data.dataload import get_dataloaders
+from src.model.get_backbone import get_backbone
+from src.model.metrics import compute_metrics
+from src.model.mynn.optimizer import get_optim
+from src.model.mynn.scheduler import get_schedul, get_warmup_schedul
 from src.utils import set_seeds, plot_loss_curves
 import torch
 from torch import nn
 import os
-
+from src.model.axial_3d import Axial3D
 
 def run_experiment(train_df, val_df, test_df, config, writer, device, fold, trial=None):
     """
@@ -70,12 +72,15 @@ def run_experiment(train_df, val_df, test_df, config, writer, device, fold, tria
                                        "best_model.pth")
         model.load_state_dict(torch.load(best_model_path, map_location=device))
     # Freeze the backbone with the specified percentage of layers
-    num_layers = len(list(model.backbone.parameters()))
-    num_layers_to_freeze = int(num_layers * config['freeze_first_percentage'])
-    for i, param in enumerate(model.backbone.parameters()):
-        if i < num_layers_to_freeze:
-            param.requires_grad = False
-    print(f"Frozen first {num_layers_to_freeze} layers out of {num_layers} in the backbone\n")
+    if model.backbone is not None:
+        num_layers = len(list(model.backbone.parameters()))
+        num_layers_to_freeze = int(num_layers * config['freeze_first_percentage'])
+        for i, param in enumerate(model.backbone.parameters()):
+            if i < num_layers_to_freeze:
+                param.requires_grad = False
+        print(f"Frozen first {num_layers_to_freeze} layers out of {num_layers} in the backbone\n")
+    else:
+        print("Warning: model.backbone is None, skipping freezing layers.")
     # Move the model to the device and parallelize it if specified
     if len(config['cuda_device']) > 1:
         model = nn.DataParallel(model, device_ids=config['cuda_device'])
@@ -101,20 +106,21 @@ def run_experiment(train_df, val_df, test_df, config, writer, device, fold, tria
         warmup_scheduler = get_warmup_schedul(config["warmup_scheduler"], optimizer, config["warmup_kwargs"])
         print(f"Using {config['warmup_scheduler']} warmup scheduler with {config['warmup_kwargs']}\n")
     # Get the scheduler if specified
-    scheduler = None
-    config['scheduler'] = config['scheduler'] if config['scheduler'] != 'None' else None
-    if config['scheduler'] is not None:
-        scheduler_class = get_schedul(config['scheduler'])
-        print(type(scheduler_class))
-        # Instantiate the scheduler with the keyword arguments specified in the config file
-        if warmup_scheduler is not None:
-            warmup_period = config["warmup_kwargs"]["warmup_period"]
-            config['scheduler_kwargs']['T_max'] = config['num_epochs'] - warmup_period
+    scheduler_class = get_schedul(config['scheduler'])
+    print(type(scheduler_class))
+    # Instantiate the scheduler with the keyword arguments specified in the config file
+    if warmup_scheduler is not None:
+        warmup_period = config["warmup_kwargs"]["warmup_period"]
+        config['scheduler_kwargs']['T_max'] = config['num_epochs'] - warmup_period
+    if scheduler_class is not None:
         scheduler = scheduler_class(
             optimizer=optimizer,
             **config['scheduler_kwargs']
         )
         print(f"Using {config['scheduler']} scheduler with {config['scheduler_kwargs']}\n")
+    else:
+        scheduler = None
+        print("No scheduler will be used.")
     if not config['skip_training']:
         results = engine.train(
             model=model,

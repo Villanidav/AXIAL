@@ -1,21 +1,18 @@
-from src.data import train_val_test_subject_split
-from src.data import load_dataframe
-from src.models.aware_net.awarenet import AwareNet
-from src.models.aware_net.get_dataloader import get_aware_loaders
+from src.data.split_data import train_val_test_subject_split
+from src.data.load_df import load_dataframe
 from src.utils import get_device
 from sklearn.model_selection import KFold
 from tqdm.auto import tqdm
 import os
-from src.models import get_backbone
-from src.data import get_transforms
-from src.data import get_dataloaders
-from src.models import Axial3D
+from src.model.get_backbone import get_backbone
+from src.data.transform import get_transforms
+from src.data.dataload import get_dataloaders
+from src.model.axial_3d import Axial3D
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
 import nibabel as nib
 import pandas as pd
-from torch.nn.functional import interpolate
 
 yellow_light = "#FFF4E0"
 yellow_dark = "#BDA77D"
@@ -335,7 +332,7 @@ def generate_explainable_mri(model_name="Axial3DVGG16", fold_num="entire_dataset
         return
     print(f"3D Attention Map loaded. Shape: {attention_map.shape}")
     # Load the template image to overlay the attention map
-    template_mri = nib.load("template/mni_icbm152_t1_tal_nlin_sym_09c.nii")
+    template_mri = nib.loadsave.load("template/mni_icbm152_t1_tal_nlin_sym_09c.nii")
     template_data = template_mri.get_fdata()
     # Define the padding to apply to obtain the same shape as the template image
     padding = [(int(np.ceil((m - t) / 2.0)), int(np.floor((m - t) / 2.0))) for m, t in
@@ -348,8 +345,8 @@ def generate_explainable_mri(model_name="Axial3DVGG16", fold_num="entire_dataset
     # Apply the attention map with amplification factor
     explainable_mri = template_data + amplification_factor * attention_map
     # Save the explainable MRI
-    explainable_mri_nii = nib.Nifti1Image(explainable_mri, template_mri.affine, template_mri.header)
-    nib.save(explainable_mri_nii, f"explainability/{model_name}/fold_{fold_num}/explainable_mri.nii")
+    explainable_mri_nii = nib.nifti1.Nifti1Image(explainable_mri, template_mri.affine, template_mri.header)
+    nib.loadsave.save(explainable_mri_nii, f"explainability/{model_name}/fold_{fold_num}/explainable_mri.nii")
     print("Explainable MRI saved")
 
 
@@ -362,7 +359,7 @@ def compute_xai_metrics(model_name="Axial3DVGG16", fold_num="entire_dataset", pe
     print(f"3D Attention Map loaded. Shape: {attention_map.shape}")
     try:
         # Load the atlas
-        atlas = nib.load("template/mni_icbm152_CerebrA_tal_nlin_sym_09c.nii")
+        atlas = nib.loadsave.load("template/mni_icbm152_CerebrA_tal_nlin_sym_09c.nii")
         atlas_data = atlas.get_fdata()
     except:
         print("Atlas not found")
@@ -412,8 +409,10 @@ def compute_xai_metrics(model_name="Axial3DVGG16", fold_num="entire_dataset", pe
                     ])
                     break
     # Creating DataFrame with specified columns
-    df = pd.DataFrame(data, columns=["Brain Area", "Volume", "Attention Mean", "Attention STD", "Attention Max",
-                                     "Attention Min", "Percentage of region"])
+    df = pd.DataFrame(data, columns=pd.Index([
+        "Brain Area", "Volume", "Attention Mean", "Attention STD", "Attention Max",
+        "Attention Min", "Percentage of region"
+    ]))
     df.sort_values(by="Volume", ascending=False, inplace=True)
     print("Dataframe created\n", df)
     df.to_csv(f"explainability/{model_name}/fold_{fold_num}/xai_metrics.csv", index=False)

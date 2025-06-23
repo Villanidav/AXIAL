@@ -1,5 +1,5 @@
 import torch.nn as nn
-import mynn
+from src.model.mynn.attention_layer import AttentionLayer
 
 
 class Axial3D(nn.Module):
@@ -15,7 +15,7 @@ class Axial3D(nn.Module):
         self.feat_map_dim = embedding_dim
         self.backbone = backbone
         self.avg_pool = nn.AdaptiveAvgPool2d(output_size=(1, 1))
-        self.attention = mynn.AttentionLayer(input_size=embedding_dim)
+        self.attention = AttentionLayer(input_size=embedding_dim)
         self.classifier = nn.Sequential(
             nn.Dropout(p=dropout, inplace=True),
             nn.Linear(in_features=embedding_dim, out_features=num_classes)

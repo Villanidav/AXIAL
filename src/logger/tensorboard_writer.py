@@ -5,7 +5,7 @@ import os
 def create_writer(config: dict,
                   fold_num: int,
                   timestamp: str,
-                  extra: str = None) -> SummaryWriter:
+                  extra: str | None = None) -> SummaryWriter:
     """
     Create a TensorBoard writer with a custom path.
     """

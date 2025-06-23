@@ -79,7 +79,7 @@ def create_dataset_csv_from_bids(bids_path: str):
     # Create a BIDSLayout object pointing to the dataset
     layout = BIDSLayout(bids_path)
     # Create dataframe with subject, mri path and diagnosis
-    df = pd.DataFrame(columns=['subject', 'mri_path', 'diagnosis'])
+    df = pd.DataFrame(columns=pd.Index(['subject', 'mri_path', 'diagnosis']))
     subjects = layout.get_subjects()
     for i, subject in enumerate(subjects):
         # Get the sessions for the subject
@@ -127,9 +127,9 @@ def create_conversion_dataset_csv_from_bids(bids_path, conversion_time):
     # Get all the sessions
     sessions = layout.get(suffix='sessions')
     # Create dataframes with the cdr scores, diagnosis and mmse score for each session for subjects that have conversion
-    pMCI = pd.DataFrame(columns=['subject', 'cdr_score', 'diagnosis', 'mmse_score'])
-    sMCI = pd.DataFrame(columns=['subject', 'cdr_score', 'diagnosis', 'mmse_score'])
-    df = pd.DataFrame(columns=['subject', 'mri_path', 'diagnosis'])
+    pMCI = pd.DataFrame(columns=pd.Index(['subject', 'cdr_score', 'diagnosis', 'mmse_score']))
+    sMCI = pd.DataFrame(columns=pd.Index(['subject', 'cdr_score', 'diagnosis', 'mmse_score']))
+    df = pd.DataFrame(columns=pd.Index(['subject', 'mri_path', 'diagnosis']))
     for session in sessions:
         # Get the diagnosis for this session and the session id
         session_df = session.get_df().dropna(subset=['diagnosis'])

@@ -4,7 +4,7 @@ from torch import Tensor
 from torch.utils.tensorboard import SummaryWriter
 from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
-from src.models import compute_metrics
+from src.model.metrics import compute_metrics
 import optuna
 
 
@@ -104,7 +104,7 @@ def train(model: torch.nn.Module,
           val_dataloader: torch.utils.data.DataLoader,
           num_classes: int,
           optimizer: torch.optim.Optimizer,
-          scheduler: torch.optim.lr_scheduler,
+          scheduler: torch.optim.lr_scheduler.LRScheduler | None,
           warmup_scheduler,
           loss_fn: torch.nn.Module,
           epochs: int,

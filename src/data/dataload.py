@@ -1,11 +1,11 @@
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
-from src.data.dataset_2d import ADNIDataset2D
+from src.data.dataset2d import ADNIDataset2D
 from src.data.dataset import ADNIDataset
 from torchvision import transforms
-from typing import Tuple, Any
+from typing import Tuple, Any, Optional
 import pandas as pd
-from src.data.transforms import RandomTransformations
+from transform import RandomTransformations
 import os
 
 
@@ -17,8 +17,8 @@ def get_dataloaders(train_df: pd.DataFrame,
                     num_slices: int,
                     train_transform: transforms.Compose,
                     test_transform: transforms.Compose,
-                    data_augmentation: RandomTransformations = None,
-                    data_augmentation_slice: transforms.Compose = None,
+                    data_augmentation: Optional[RandomTransformations] = None,
+                    data_augmentation_slice: Optional[transforms.Compose] = None,
                     revert_slices_order: bool = False,
                     output_type: str = "3D",
                     slicing_plane: str = "axial",
@@ -86,6 +86,9 @@ def get_dataloaders(train_df: pd.DataFrame,
                                class_to_idx=class_to_idx,
                                revert_slices_order=revert_slices_order,
                                slicing_plane=slicing_plane)
+
+    if train_dataset is None or val_dataset is None or test_dataset is None:
+        raise ValueError("Datasets must not be None before creating samplers or dataloaders.")
 
     # --- Create DistributedSamplers ---
     train_sampler = None

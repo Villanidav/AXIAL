@@ -31,7 +31,7 @@ class RandomTransformations:
         return s
 
 
-def get_transforms_from_config(config) -> RandomTransformations:
+def get_transforms_from_config(config) -> RandomTransformations | None:
     # Check if we are going to apply any transformation
     if config['RandomTransformations']['probability'] == 0:
         print("No 3D data augmentation will be applied")

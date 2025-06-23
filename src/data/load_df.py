@@ -10,5 +10,5 @@ def load_dataframe(csv_path, diagnosis):
     # Get only the MRI paths and the diagnosis with diagnosis CN and AD
     df = df[df['diagnosis'].isin(diagnosis)][['subject', 'mri_path', 'diagnosis']]
     # Get the df subjects
-    subjects = df['subject'].unique()
+    subjects = pd.unique(df['subject'])
     return df, subjects

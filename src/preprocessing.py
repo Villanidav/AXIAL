@@ -1,12 +1,12 @@
 import os
 import sys
 from multiprocessing import cpu_count
-import nipype.interfaces.fsl as fsl
 from nipype.interfaces.ants import N4BiasFieldCorrection
 from nipype.interfaces.ants import RegistrationSynQuick
 from tqdm.auto import tqdm
 import nibabel as nib
 from brainextractor import BrainExtractor
+from typing import cast
 
 
 
@@ -15,11 +15,14 @@ def save_skullstripped(img_path, mask_path, output_path):
     Save the skull-stripped image using the mask.
     """
     # Load the image and mask
-    img = nib.load(img_path)
-    mask = nib.load(mask_path)
+    img = nib.loadsave.load(img_path)
+    img = cast(nib.nifti1.Nifti1Image, img)
+    mask = nib.loadsave.load(mask_path)
+    mask = cast(nib.nifti1.Nifti1Image, mask)
+    
     #Apply the mask to the image and save
     masked_data = img.get_fdata() * (mask.get_fdata() > 0)
-    stripped_img = nib.Nifti1Image(masked_data, img.affine, img.header)
+    stripped_img = nib.nifti1.Nifti1Image(masked_data, img.affine, img.header)
     stripped_img.to_filename(output_path)
 
 def preproc_pipeline(in_file, out_dir, n_proc=None):
@@ -62,7 +65,7 @@ def preproc_pipeline(in_file, out_dir, n_proc=None):
     skull_stripped = os.path.join(out_dir, os.path.splitext(os.path.splitext(os.path.basename(in_file))[0])[0] + '_space-MNI152_desc-preproc-N4-skullstripped.nii.gz')
     
     # Load the input image
-    input_img = nib.load(registered_image_path)
+    input_img = nib.loadsave.load(registered_image_path)
     # Initialize the BrainExtractor with the desired fractional intensity threshold
     bet = BrainExtractor(img=input_img)
     # Run the brain extraction

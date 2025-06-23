@@ -7,6 +7,8 @@ This repository contains the project for the "Numerical Analysis for Machine Lea
 
 The goal of this project was to reproduce the findings of the AXIAL paper by following a similar methodology, leveraging publicly available data and high-performance computing resources. We aimed to understand and implement the techniques used for predicting Alzheimer's disease while emphasizing model explainability. Beyond simple replication, we explored hyperparameter tuning and methodological adjustments to improve upon the original model's performance.
 
+The project report is available in [docs/NAML.pdf](docs/NAML.pdf)
+
 ## Methodology
 
 The replication process involved the following key steps:
@@ -30,13 +32,7 @@ Follow these instructions to set up the environment and run the experiments.
 
 ### HPC Environment Disclaimer
 
-**Important**: The entire workflow, from preprocessing to training, was developed and tested on the **JEDI High-Performance Computing (HPC) cluster**. The process requires significant computational resources (specifically, high-VRAM GPUs like the NVIDIA GH200) and storage for the ADNI dataset. **Replication on a standard local machine (e.g., a laptop or desktop) may not be feasible** due to GPU memory limitations, long training times, and large data storage requirements.
-
-## Prerequisites
-
-*   Access to a Linux-based system with NVIDIA GPUs and CUDA.
-*   **Access to the ADNI dataset**. You must apply for access and download the data yourself.
-*   [Clinica](http://www.clinica.run/) software toolkit installed for initial neuroimaging preprocessing.
+**Important**: The entire workflow, from preprocessing to training, was developed and tested on the **JEDI High-Performance Computing (HPC) cluster**. The process requires significant computational resources (specifically, high-VRAM GPUs. The cluster mounts NVIDIA GH200 accelerators) and storage for the processed ADNI dataset. **Replication on a standard local machine (e.g., a laptop or desktop) may not be feasible** due to GPU memory limitations, long training times, and large data storage requirements.
 
 ## Replication Steps
    ### ADNI Data Download

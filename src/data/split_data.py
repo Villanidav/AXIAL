@@ -14,7 +14,7 @@ def train_val_test_subject_split(df,
                                                     test_size=val_perc_split,
                                                     random_state=random_seed)
     # Split the dataset in train and test
-    train_df = df[df['subject'].isin(train_subjects)]
-    val_df = df[df['subject'].isin(val_subjects)]
-    test_df = df[df['subject'].isin(test_subj)]
+    train_df = df.loc[df['subject'].isin(train_subjects)].copy()
+    val_df = df.loc[df['subject'].isin(val_subjects)].copy()
+    test_df = df.loc[df['subject'].isin(test_subj)].copy()
     return train_df, val_df, test_df
