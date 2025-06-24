@@ -18,7 +18,6 @@ from typing import Tuple
 import pandas as pd
 import torch
 import nibabel
-import random
 from transform import RandomTransformations
 
 
@@ -96,7 +95,7 @@ class ADNIDataset(Dataset):
         # Load the image
         img = self.load_image(index)
         # Convert the image to a numpy array 
-        img = img.get_fdata(dtype='float32')
+        img = img.get_fdata(dtype='float32') # type: ignore[attr-defined]
         # Get the class name and index
         class_name = self.dataframe.diagnosis.values[index]  # expects the dataframe in format (filename, label)
         class_idx = self.class_to_idx[class_name]

@@ -102,7 +102,6 @@ def inference(model_name="Axial3DVGG16", random_seed=42, num_workers=10, cuda_id
                                                       num_slices=num_slices,
                                                       train_transform=transform,
                                                       test_transform=transform,
-                                                      output_type="3D",
                                                       slicing_plane=plane)
                 # Load the model
                 model = Axial3D(backbone=backbone,
@@ -333,7 +332,7 @@ def generate_explainable_mri(model_name="Axial3DVGG16", fold_num="entire_dataset
     print(f"3D Attention Map loaded. Shape: {attention_map.shape}")
     # Load the template image to overlay the attention map
     template_mri = nib.loadsave.load("template/mni_icbm152_t1_tal_nlin_sym_09c.nii")
-    template_data = template_mri.get_fdata()
+    template_data = template_mri.get_fdata() # type: ignore[attr-defined]
     # Define the padding to apply to obtain the same shape as the template image
     padding = [(int(np.ceil((m - t) / 2.0)), int(np.floor((m - t) / 2.0))) for m, t in
                zip(template_data.shape, attention_map.shape)]
@@ -345,7 +344,7 @@ def generate_explainable_mri(model_name="Axial3DVGG16", fold_num="entire_dataset
     # Apply the attention map with amplification factor
     explainable_mri = template_data + amplification_factor * attention_map
     # Save the explainable MRI
-    explainable_mri_nii = nib.nifti1.Nifti1Image(explainable_mri, template_mri.affine, template_mri.header)
+    explainable_mri_nii = nib.nifti1.Nifti1Image(explainable_mri, template_mri.affine, template_mri.header) # type: ignore[attr-defined]
     nib.loadsave.save(explainable_mri_nii, f"explainability/{model_name}/fold_{fold_num}/explainable_mri.nii")
     print("Explainable MRI saved")
 
@@ -359,12 +358,12 @@ def compute_xai_metrics(model_name="Axial3DVGG16", fold_num="entire_dataset", pe
     print(f"3D Attention Map loaded. Shape: {attention_map.shape}")
     try:
         # Load the atlas
-        atlas = nib.loadsave.load("template/mni_icbm152_CerebrA_tal_nlin_sym_09c.nii")
-        atlas_data = atlas.get_fdata()
+        atlas = nib.loadsave.load("template/mni_icbm152_CerebrA_tal_nlin_sym_09c.nii")  
+        atlas_data = atlas.get_fdata() # type: ignore[attr-defined]
     except:
         print("Atlas not found")
         return
-    print(f"Atlas loaded. Shape: {atlas.shape}")
+    print(f"Atlas loaded. Shape: {atlas_data.shape}")
     # Define the padding to apply to obtain the same shape as the template image
     padding = [(int(np.ceil((m - t) / 2.0)), int(np.floor((m - t) / 2.0))) for m, t in
                zip(atlas_data.shape, attention_map.shape)]

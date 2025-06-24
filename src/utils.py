@@ -1,10 +1,7 @@
 import warnings
-from src.data.dataset import ADNIDataset
-from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
 from bids import BIDSLayout
 import pandas as pd
-import torchvision
 import numpy as np
 import random
 import torch

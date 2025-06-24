@@ -36,7 +36,7 @@ def run_experiment(train_df, val_df, test_df, config, writer, device, fold, tria
         revert_slices_order=config['revert_slices_order'],
         slicing_plane=config['slicing_plane'],
     )
-    #TODO idk why it's missing radimgnet classes, I am inserting it by heart
+    #idk why it's missing radimgnet classes
     config['radimgnet_classes'] = num_classes
 
     # Get the pretrained backbone on RadImageNet or ImageNet

@@ -1,12 +1,10 @@
 from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
-from src.data.dataset2d import ADNIDataset2D
 from src.data.dataset import ADNIDataset
 from torchvision import transforms
 from typing import Tuple, Any, Optional
 import pandas as pd
 from transform import RandomTransformations
-import os
 
 
 def get_dataloaders(train_df: pd.DataFrame,
@@ -20,7 +18,6 @@ def get_dataloaders(train_df: pd.DataFrame,
                     data_augmentation: Optional[RandomTransformations] = None,
                     data_augmentation_slice: Optional[transforms.Compose] = None,
                     revert_slices_order: bool = False,
-                    output_type: str = "3D",
                     slicing_plane: str = "axial",
                     rank: int = 0,
                     world_size: int = 1,
@@ -41,44 +38,27 @@ def get_dataloaders(train_df: pd.DataFrame,
     if is_main_process:
         print(f"Class to index: {class_to_idx}", flush=True)
 
-    if output_type not in ["2D", "3D"]:
-        raise ValueError("output_type must be 2D or 3D")
-
     # Create the datasets
     train_dataset = None
     val_dataset = None
-    if output_type == "3D":
-        train_dataset = ADNIDataset(dataframe=train_df,
-                                    transform=train_transform,
-                                    data_augmentation=data_augmentation,
-                                    data_augmentation_slice=data_augmentation_slice,
-                                    num_slices=num_slices,
-                                    classes=classes,
-                                    class_to_idx=class_to_idx,
-                                    revert_slices_order=revert_slices_order,
-                                    slicing_plane=slicing_plane)
-        val_dataset = ADNIDataset(dataframe=val_df,
-                                  transform=test_transform,
-                                  num_slices=num_slices,
-                                  classes=classes,
-                                  class_to_idx=class_to_idx,
-                                  revert_slices_order=revert_slices_order,
-                                  slicing_plane=slicing_plane)
-    elif output_type == "2D":
-        train_dataset = ADNIDataset2D(dataframe=train_df,
-                                      transform=train_transform,
-                                      data_augmentation=data_augmentation_slice,
-                                      num_slices=num_slices,
-                                      classes=classes,
-                                      class_to_idx=class_to_idx,
-                                      slicing_plane=slicing_plane)
-        val_dataset = ADNIDataset2D(dataframe=val_df,
-                                    transform=test_transform,
-                                    num_slices=num_slices,
-                                    classes=classes,
-                                    class_to_idx=class_to_idx,
-                                    slicing_plane=slicing_plane)
-    # The test dataset is the same for both 2D and 3D to use the entire MRI in the test phase
+    train_dataset = ADNIDataset(dataframe=train_df,
+                                transform=train_transform,
+                                data_augmentation=data_augmentation,
+                                data_augmentation_slice=data_augmentation_slice,
+                                num_slices=num_slices,
+                                classes=classes,
+                                class_to_idx=class_to_idx,
+                                revert_slices_order=revert_slices_order,
+                                slicing_plane=slicing_plane)
+                                
+    val_dataset = ADNIDataset(dataframe=val_df,
+                                transform=test_transform,
+                                num_slices=num_slices,
+                                classes=classes,
+                                class_to_idx=class_to_idx,
+                                revert_slices_order=revert_slices_order,
+                                slicing_plane=slicing_plane)
+
     test_dataset = ADNIDataset(dataframe=test_df,
                                transform=test_transform,
                                num_slices=num_slices,
@@ -141,14 +121,9 @@ def get_dataloaders(train_df: pd.DataFrame,
         drop_last=False # Usually keep all validation samples
     )
 
-    # Adjust test batch size based on original logic if output_type is 2D
-    test_batch_size = 1 if output_type == "2D" else batch_size
-    if is_main_process and output_type == "2D":
-         print(f"Note: Setting test dataloader batch size to 1 for 2D output type.", flush=True)
-
     test_dataloader = DataLoader(
         test_dataset,
-        batch_size=test_batch_size, # Use adjusted or original batch size
+        batch_size=batch_size, # Use adjusted or original batch size
         shuffle=False,
         num_workers=num_workers,
         sampler=test_sampler, # Pass the sampler
